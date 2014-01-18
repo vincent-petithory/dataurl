@@ -43,14 +43,14 @@ func (mt *MediaType) String() string {
 	for k, v := range mt.Params {
 		fmt.Fprintf(&buf, ";%s=%s", k, EscapeString(v))
 	}
-	return mt.ContentType()+(&buf).String()
+	return mt.ContentType() + (&buf).String()
 }
 
 // DataURL is the combination of a MediaType describing the type of its Data.
 type DataURL struct {
 	MediaType
-	Encoding  string
-	Data      []byte
+	Encoding string
+	Data     []byte
 }
 
 // String implements the Stringer interface.

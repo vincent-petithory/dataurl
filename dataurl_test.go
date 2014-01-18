@@ -3,12 +3,12 @@ package dataurl
 import (
 	"bytes"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"regexp"
 	"strings"
 	"testing"
-	"net/http/httptest"
-	"net/http"
 )
 
 type dataURLTest struct {
