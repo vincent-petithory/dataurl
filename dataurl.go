@@ -1,6 +1,3 @@
-// Package dataurl parses Data URL Schemes
-// according to RFC 2397
-// (http://tools.ietf.org/html/rfc2397).
 package dataurl
 
 import (
