@@ -131,7 +131,8 @@ func isBase64Rune(r rune) bool {
 		(r >= '0' && r <= '9') ||
 		r == '+' ||
 		r == '/' ||
-		r == '='
+		r == '=' ||
+		r == '\n'
 }
 
 type stateFn func(*lexer) stateFn
