@@ -59,10 +59,6 @@ func isHex(c byte) bool {
 		return true
 	}
 	return false
-
-	//return (c >= 'a' && c <= 'f') ||
-	//	(c >= 'A' && c <= 'F') ||
-	//	(c >= '0' && c <= '9')
 }
 
 // borrowed from net/url/url.go
