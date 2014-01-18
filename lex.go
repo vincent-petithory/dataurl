@@ -253,7 +253,6 @@ func lexXTokenMediaType(l *lexer) stateFn {
 			return l.errorf("invalid character for media type")
 		}
 	}
-	return nil
 }
 
 func lexInDiscreteMediaType(l *lexer) stateFn {
@@ -274,7 +273,6 @@ func lexInDiscreteMediaType(l *lexer) stateFn {
 			return l.errorf("invalid character for media type")
 		}
 	}
-	return nil
 }
 
 func lexMediaType(l *lexer) stateFn {
