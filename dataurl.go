@@ -51,7 +51,7 @@ func (mt *MediaType) String() string {
 
 // DataURL is the combination of a MediaType describing the type of its Data.
 type DataURL struct {
-	MediaType MediaType
+	MediaType
 	Encoding  string
 	Data      []byte
 }

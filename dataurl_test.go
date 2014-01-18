@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"net/http/httptest"
+	"net/http"
 )
 
 type dataURLTest struct {
@@ -267,7 +269,7 @@ func TestLexDataURLs(t *testing.T) {
 	}
 }
 
-func TestDataURLs(t *testing.T) {
+func testDataURLs(t *testing.T, factory func(string) (*DataURL, error)) {
 	for _, test := range genTestTable() {
 		var expectedItemError string
 		for _, item := range test.ExpectedItems {
@@ -276,7 +278,7 @@ func TestDataURLs(t *testing.T) {
 				break
 			}
 		}
-		dataURL, err := Decode(strings.NewReader(test.InputRawDataURL))
+		dataURL, err := factory(test.InputRawDataURL)
 		if expectedItemError == "" && err != nil {
 			t.Error(err)
 			continue
@@ -296,6 +298,18 @@ func TestDataURLs(t *testing.T) {
 			t.Errorf("Expected %v, got %v", test.ExpectedDataURL, *dataURL)
 		}
 	}
+}
+
+func TestDataURLsWithDecode(t *testing.T) {
+	testDataURLs(t, func(s string) (*DataURL, error) {
+		return Decode(strings.NewReader(s))
+	})
+}
+
+func TestDataURLsWithDecodeString(t *testing.T) {
+	testDataURLs(t, func(s string) (*DataURL, error) {
+		return DecodeString(s)
+	})
 }
 
 func BenchmarkLex(b *testing.B) {
@@ -342,4 +356,59 @@ func BenchmarkRegexp(b *testing.B) {
 			_ = re.FindStringSubmatch(test.InputRawDataURL)
 		}
 	}
+}
+
+func ExampleDecodeString() {
+	dataURL, err := DecodeString(`data:text/plain;charset=utf-8;base64,aGV5YQ==`)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Printf("%s, %s", dataURL.MediaType.ContentType(), string(dataURL.Data))
+	// Output: text/plain, heya
+}
+
+func ExampleDecode() {
+	r, err := http.NewRequest(
+		"POST", "/",
+		strings.NewReader(`data:image/vnd.microsoft.icon;name=golang%20favicon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAD///8AVE44//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb/
+/uF2/1ROOP////8A////AFROOP/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+
+4Xb//uF2//7hdv9UTjj/////AP///wBUTjj//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7h
+dv/+4Xb//uF2//7hdv/+4Xb/VE44/////wD///8AVE44//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2
+//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2/1ROOP////8A////AFROOP/+4Xb//uF2//7hdv/+4Xb/
+/uF2//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv9UTjj/////AP///wBUTjj//uF2//7hdv/+
+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb/VE44/////wD///8AVE44//7h
+dv/+4Xb//uF2//7hdv/+4Xb/z7t5/8Kyev/+4Xb//993///dd///3Xf//uF2/1ROOP////8A////
+AFROOP/+4Xb//uF2//7hdv//4Hn/dIzD//v8///7/P//dIzD//7hdv//3Xf//913//7hdv9UTjj/
+////AP///wBUTjj//uF2///fd//+4Xb//uF2/6ajif90jMP/dIzD/46Zpv/+4Xb//+F1///feP/+
+4Xb/VE44/////wD///8AVE44//7hdv/z1XT////////////Is3L/HyAj/x8gI//Is3L/////////
+///z1XT//uF2/1ROOP////8A19nd/1ROOP/+4Xb/5+HS//v+//8RExf/Liwn//7hdv/+4Xb/5+HS
+//v8//8RExf/Liwn//7hdv9UTjj/19nd/1ROOP94aDT/yKdO/+fh0v//////ERMX/y4sJ//+4Xb/
+/uF2/+fh0v//////ERMX/y4sJ//Ip07/dWU3/1ROOP9UTjj/yKdO/6qSSP/Is3L/9fb7//f6///I
+s3L//uF2//7hdv/Is3L////////////Is3L/qpJI/8inTv9UTjj/19nd/1ROOP97c07/qpJI/8in
+Tv/Ip07//uF2//7hdv/+4Xb//uF2/8zBlv/Kv4//pZJU/3tzTv9UTjj/19nd/////wD///8A4eLl
+/6CcjP97c07/e3NO/1dOMf9BOiX/TkUn/2VXLf97c07/e3NO/6CcjP/h4uX/////AP///wD///8A
+////AP///wD///8A////AP///wDq6/H/3N/j/9fZ3f/q6/H/////AP///wD///8A////AP///wD/
+//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAA==`),
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	var dataURL *DataURL
+	h := func(w http.ResponseWriter, r *http.Request) {
+		var err error
+		dataURL, err = Decode(r.Body)
+		defer r.Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+	w := httptest.NewRecorder()
+	h(w, r)
+	fmt.Printf("%s: %s", dataURL.Params["name"], dataURL.ContentType())
+	// Output: golang favicon: image/vnd.microsoft.icon
 }
