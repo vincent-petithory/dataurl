@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/url"
 	"strconv"
 )
 
@@ -35,13 +34,19 @@ type MediaType struct {
 	Params  map[string]string
 }
 
+func (mt *MediaType) ContentType() string {
+	return fmt.Sprintf("%s/%s", mt.Type, mt.Subtype)
+}
+
 // String implements the Stringer interface.
+//
+// Params values are escaped with the Escape function, rather than in a quoted string.
 func (mt *MediaType) String() string {
 	var buf bytes.Buffer
 	for k, v := range mt.Params {
-		fmt.Fprintf(&buf, ";%s=%s", k, url.QueryEscape(v))
+		fmt.Fprintf(&buf, ";%s=%s", k, EscapeString(v))
 	}
-	return fmt.Sprintf("%s/%s%s", mt.Type, mt.Subtype, (&buf).String())
+	return mt.ContentType()+(&buf).String()
 }
 
 // DataURL is the combination of a MediaType describing the type of its Data.
@@ -54,8 +59,7 @@ type DataURL struct {
 type encodedDataReader func(string) ([]byte, error)
 
 var asciiDataReader encodedDataReader = func(s string) ([]byte, error) {
-	// FIXME url.QueryUnescape may not be 100% appropriate
-	us, err := url.QueryUnescape(s)
+	us, err := Unescape(s)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +108,7 @@ func (p *parser) parse() error {
 				}
 				val = us
 			} else {
-				us, err := url.QueryUnescape(val)
+				us, err := UnescapeToString(val)
 				if err != nil {
 					return err
 				}
