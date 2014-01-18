@@ -136,6 +136,8 @@ func isBase64Rune(r rune) bool {
 
 type stateFn func(*lexer) stateFn
 
+// lexer lexes the data URL scheme input string.
+// The implementation is from the text/template/parser package.
 type lexer struct {
 	input          string
 	start          int

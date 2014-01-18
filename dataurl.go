@@ -1,6 +1,6 @@
 // Package dataurl parses Data URL Schemes
-// according to RFC 2397.
-// http://tools.ietf.org/html/rfc2397.
+// according to RFC 2397
+// (http://tools.ietf.org/html/rfc2397).
 package dataurl
 
 import (
@@ -27,12 +27,15 @@ func defaultMediaType() MediaType {
 	}
 }
 
+// MediaType is the combination of a media type, a media subtype
+// and optional parameters.
 type MediaType struct {
 	Type    string
 	Subtype string
 	Params  map[string]string
 }
 
+// String implements the Stringer interface.
 func (mt *MediaType) String() string {
 	var buf bytes.Buffer
 	for k, v := range mt.Params {
@@ -41,6 +44,7 @@ func (mt *MediaType) String() string {
 	return fmt.Sprintf("%s/%s%s", mt.Type, mt.Subtype, (&buf).String())
 }
 
+// DataURL is the combination of a MediaType describing the type of its Data.
 type DataURL struct {
 	MediaType MediaType
 	Encoding  string
@@ -130,6 +134,7 @@ func (p *parser) parse() error {
 	panic("EOF not found")
 }
 
+// DecodeString decodes a Data URL scheme string.
 func DecodeString(s string) (*DataURL, error) {
 	du := &DataURL{
 		MediaType: defaultMediaType(),
@@ -146,6 +151,7 @@ func DecodeString(s string) (*DataURL, error) {
 	return du, nil
 }
 
+// Decode decodes a Data URL scheme from a io.Reader.
 func Decode(r io.Reader) (*DataURL, error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
