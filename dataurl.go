@@ -56,6 +56,55 @@ type DataURL struct {
 	Data      []byte
 }
 
+// String implements the Stringer interface.
+//
+// Note: it doesn't guarantee the returned string is equal to
+// the initial source string that was used to create this DataURL.
+// The reasons for that are:
+//  * Insertion of default values for MediaType that were maybe not in the initial string,
+//  * Various ways to encode the MediaType parameters (quoted string or url encoded string, the latter is used),
+func (du *DataURL) String() string {
+	var buf bytes.Buffer
+	du.WriteTo(&buf)
+	return (&buf).String()
+}
+
+// WriteTo implements the WriterTo interface.
+// See the note about String().
+func (du *DataURL) WriteTo(w io.Writer) (n int64, err error) {
+	var ni int
+	ni, _ = fmt.Fprint(w, "data:")
+	n += int64(ni)
+
+	ni, _ = fmt.Fprint(w, du.MediaType.String())
+	n += int64(ni)
+
+	if du.Encoding == EncodingBase64 {
+		ni, _ = fmt.Fprint(w, ";base64")
+		n += int64(ni)
+	}
+
+	ni, _ = fmt.Fprint(w, ",")
+	n += int64(ni)
+
+	if du.Encoding == EncodingBase64 {
+		encoder := base64.NewEncoder(base64.StdEncoding, w)
+		ni, err = encoder.Write(du.Data)
+		if err != nil {
+			return
+		}
+		encoder.Close()
+	} else if du.Encoding == EncodingASCII {
+		ni, _ = fmt.Fprint(w, Escape(du.Data))
+		n += int64(ni)
+	} else {
+		err = fmt.Errorf("dataurl: invalid encoding %s", du.Encoding)
+		return
+	}
+
+	return
+}
+
 type encodedDataReader func(string) ([]byte, error)
 
 var asciiDataReader encodedDataReader = func(s string) ([]byte, error) {

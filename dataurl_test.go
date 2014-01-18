@@ -312,6 +312,32 @@ func TestDataURLsWithDecodeString(t *testing.T) {
 	})
 }
 
+func TestRoundTrip(t *testing.T) {
+	tests := []struct {
+		s           string
+		roundTripOk bool
+	}{
+		{`data:text/plain;charset=utf-8;foo=bar;base64,aGV5YQ==`, true},
+		{`data:;charset=utf-8;foo=bar;base64,aGV5YQ==`, false},
+		{`data:text/plain;charset=utf-8;foo="bar";base64,aGV5YQ==`, false},
+		{`data:text/plain;charset=utf-8;foo="bar",A%20brief%20note`, false},
+		{`data:text/plain;charset=utf-8;foo=bar,A%20brief%20note`, true},
+	}
+	for _, test := range tests {
+		dataURL, err := DecodeString(test.s)
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+		dus := dataURL.String()
+		if test.roundTripOk && dus != test.s {
+			t.Errorf("Expected %s, got %s", test.s, dus)
+		} else if !test.roundTripOk && dus == test.s {
+			t.Errorf("Found %s, expected something else", test.s)
+		}
+	}
+}
+
 func BenchmarkLex(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for _, test := range genTestTable() {
