@@ -44,15 +44,14 @@ func handleDataURLUpload(w http.ResponseWriter, r *http.Request) {
 	dataURL, err := dataurl.Decode(r.Body)
 	defer r.Body.Close()
 	if err != nil {
-		http.Error(w, err.Error(), http.BadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	if dataURL.ContentType() == "image/png" {
 		ioutil.WriteFile("image.png", dataURL.Data, 0644)
 	} else {
-		http.Error(w, err.Error(), http.BadRequest)
+		http.Error(w, "not a png", http.StatusBadRequest)
 	}
-
 }
 ~~~
 
