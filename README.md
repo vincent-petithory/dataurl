@@ -18,7 +18,7 @@ go get github.com/vincent-petithory/dataurl
 
 ## Usage
 
-~~~
+~~~ go
 package main
 
 import (
@@ -38,7 +38,7 @@ func main() {
 
 From a `http.Handler`:
 
-~~~
+~~~ go
 func handleDataURLUpload(w http.ResponseWriter, r *http.Request) {
 	dataURL, err := dataurl.Decode(r.Body)
 	defer r.Body.Close()
