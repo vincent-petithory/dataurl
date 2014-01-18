@@ -1,4 +1,4 @@
-# Data URL Schemes for Go [![GoDoc](https://godoc.org/github.com/vincent-petithory/dataurl?status.png)](https://godoc.org/github.com/vincent-petithory/dataurl)
+# Data URL Schemes for Go [![GoDoc](https://godoc.org/github.com/vincent-petithory/dataurl?status.png)](https://godoc.org/github.com/vincent-petithory/dataurl) [![Codebot](https://codebot.io/badge/github.com/vincent-petithory/dataurl.png)](http://codebot.io/doc/pkg/github.com/vincent-petithory/dataurl "Codebot")
 
 This package parses and generates Data URL Schemes for the Go language, according to [RFC 2397](http://tools.ietf.org/html/rfc2397).
 
