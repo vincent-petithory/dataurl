@@ -23,6 +23,7 @@ package main
 
 import (
 	"github.com/vincent-petithory/dataurl"
+	"fmt"
 )
 
 func main() {
