@@ -338,6 +338,98 @@ func TestRoundTrip(t *testing.T) {
 	}
 }
 
+func TestNew(t *testing.T) {
+	tests := []struct {
+		Data            []byte
+		MediaType       string
+		ParamPairs      []string
+		WillPanic       bool
+		ExpectedDataURL *DataURL
+	}{
+		{
+			[]byte(`{"msg": "heya"}`),
+			"application/json",
+			[]string{},
+			false,
+			&DataURL{
+				MediaType{
+					"application",
+					"json",
+					map[string]string{},
+				},
+				EncodingBase64,
+				[]byte(`{"msg": "heya"}`),
+			},
+		},
+		{
+			[]byte(``),
+			"application//json",
+			[]string{},
+			true,
+			nil,
+		},
+		{
+			[]byte(``),
+			"",
+			[]string{},
+			true,
+			nil,
+		},
+		{
+			[]byte(`{"msg": "heya"}`),
+			"text/plain",
+			[]string{"charset", "utf-8"},
+			false,
+			&DataURL{
+				MediaType{
+					"text",
+					"plain",
+					map[string]string{
+						"charset": "utf-8",
+					},
+				},
+				EncodingBase64,
+				[]byte(`{"msg": "heya"}`),
+			},
+		},
+		{
+			[]byte(`{"msg": "heya"}`),
+			"text/plain",
+			[]string{"charset", "utf-8", "name"},
+			true,
+			nil,
+		},
+	}
+	for _, test := range tests {
+		var dataURL *DataURL
+		func() {
+			defer func() {
+				if test.WillPanic {
+					if e := recover(); e == nil {
+						t.Error("Expected panic didn't happen")
+					}
+				} else {
+					if e := recover(); e != nil {
+						t.Errorf("Unexpected panic: %v", e)
+					}
+				}
+			}()
+			dataURL = New(test.Data, test.MediaType, test.ParamPairs...)
+		}()
+		if test.WillPanic {
+			if dataURL != nil {
+				t.Error("Expected nil DataURL")
+			}
+		} else {
+			if ok, err := equal(dataURL, test.ExpectedDataURL); err != nil {
+				t.Error(err)
+			} else if !ok {
+				t.Errorf("Expected %v, got %v", test.ExpectedDataURL, *dataURL)
+			}
+		}
+	}
+}
+
 func BenchmarkLex(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for _, test := range genTestTable() {

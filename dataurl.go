@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -51,6 +52,39 @@ type DataURL struct {
 	MediaType
 	Encoding string
 	Data     []byte
+}
+
+// New returns a new DataURL initialized with data and
+// a MediaType parsed from mediatype and paramPairs.
+// mediatype must be of the form "type/subtype" or it will panic.
+// paramPairs must have an even number of elements or it will panic.
+// For more complex DataURL, initialize a DataURL struct.
+// The DataURL is initialized with base64 encoding.
+func New(data []byte, mediatype string, paramPairs ...string) *DataURL {
+	parts := strings.Split(mediatype, "/")
+	if len(parts) != 2 {
+		panic("dataurl: invalid mediatype")
+	}
+
+	nParams := len(paramPairs)
+	if nParams%2 != 0 {
+		panic("dataurl: requires an even number of param pairs")
+	}
+	params := make(map[string]string)
+	for i := 0; i < nParams; i += 2 {
+		params[paramPairs[i]] = paramPairs[i+1]
+	}
+
+	mt := MediaType{
+		parts[0],
+		parts[1],
+		params,
+	}
+	return &DataURL{
+		MediaType: mt,
+		Encoding:  EncodingBase64,
+		Data:      data,
+	}
 }
 
 // String implements the Stringer interface.
