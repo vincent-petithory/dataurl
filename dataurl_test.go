@@ -2,6 +2,7 @@ package dataurl
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -430,6 +431,61 @@ func TestNew(t *testing.T) {
 	}
 }
 
+var golangFavicon = strings.Replace(`AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAD///8AVE44//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb/
+/uF2/1ROOP////8A////AFROOP/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+
+4Xb//uF2//7hdv9UTjj/////AP///wBUTjj//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7h
+dv/+4Xb//uF2//7hdv/+4Xb/VE44/////wD///8AVE44//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2
+//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2/1ROOP////8A////AFROOP/+4Xb//uF2//7hdv/+4Xb/
+/uF2//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv9UTjj/////AP///wBUTjj//uF2//7hdv/+
+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb/VE44/////wD///8AVE44//7h
+dv/+4Xb//uF2//7hdv/+4Xb/z7t5/8Kyev/+4Xb//993///dd///3Xf//uF2/1ROOP////8A////
+AFROOP/+4Xb//uF2//7hdv//4Hn/dIzD//v8///7/P//dIzD//7hdv//3Xf//913//7hdv9UTjj/
+////AP///wBUTjj//uF2///fd//+4Xb//uF2/6ajif90jMP/dIzD/46Zpv/+4Xb//+F1///feP/+
+4Xb/VE44/////wD///8AVE44//7hdv/z1XT////////////Is3L/HyAj/x8gI//Is3L/////////
+///z1XT//uF2/1ROOP////8A19nd/1ROOP/+4Xb/5+HS//v+//8RExf/Liwn//7hdv/+4Xb/5+HS
+//v8//8RExf/Liwn//7hdv9UTjj/19nd/1ROOP94aDT/yKdO/+fh0v//////ERMX/y4sJ//+4Xb/
+/uF2/+fh0v//////ERMX/y4sJ//Ip07/dWU3/1ROOP9UTjj/yKdO/6qSSP/Is3L/9fb7//f6///I
+s3L//uF2//7hdv/Is3L////////////Is3L/qpJI/8inTv9UTjj/19nd/1ROOP97c07/qpJI/8in
+Tv/Ip07//uF2//7hdv/+4Xb//uF2/8zBlv/Kv4//pZJU/3tzTv9UTjj/19nd/////wD///8A4eLl
+/6CcjP97c07/e3NO/1dOMf9BOiX/TkUn/2VXLf97c07/e3NO/6CcjP/h4uX/////AP///wD///8A
+////AP///wD///8A////AP///wDq6/H/3N/j/9fZ3f/q6/H/////AP///wD///8A////AP///wD/
+//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAA==`, "\n", "", -1)
+
+func TestEncodeBytes(t *testing.T) {
+	mustDecode := func(s string) []byte {
+		data, err := base64.StdEncoding.DecodeString(s)
+		if err != nil {
+			panic(err)
+		}
+		return data
+	}
+	tests := []struct {
+		Data           []byte
+		ExpectedString string
+	}{
+		{
+			[]byte(`A brief note`),
+			"data:text/plain;charset=utf-8;base64,QSBicmllZiBub3Rl",
+		},
+		{
+			[]byte{0xA, 0xFF, 0x99, 0x34, 0x56, 0x34, 0x00},
+			`data:application/octet-stream;base64,Cv+ZNFY0AA==`,
+		},
+		{
+			mustDecode(golangFavicon),
+			`data:image/vnd.microsoft.icon;base64,` + golangFavicon,
+		},
+	}
+	for _, test := range tests {
+		str := EncodeBytes(test.Data)
+		if str != test.ExpectedString {
+			t.Errorf("Expected %s, got %s", test.ExpectedString, str)
+		}
+	}
+}
+
 func BenchmarkLex(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for _, test := range genTestTable() {
@@ -489,27 +545,7 @@ func ExampleDecodeString() {
 func ExampleDecode() {
 	r, err := http.NewRequest(
 		"POST", "/",
-		strings.NewReader(`data:image/vnd.microsoft.icon;name=golang%20favicon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAD///8AVE44//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb/
-/uF2/1ROOP////8A////AFROOP/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+
-4Xb//uF2//7hdv9UTjj/////AP///wBUTjj//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7h
-dv/+4Xb//uF2//7hdv/+4Xb/VE44/////wD///8AVE44//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2
-//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2/1ROOP////8A////AFROOP/+4Xb//uF2//7hdv/+4Xb/
-/uF2//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv9UTjj/////AP///wBUTjj//uF2//7hdv/+
-4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb//uF2//7hdv/+4Xb/VE44/////wD///8AVE44//7h
-dv/+4Xb//uF2//7hdv/+4Xb/z7t5/8Kyev/+4Xb//993///dd///3Xf//uF2/1ROOP////8A////
-AFROOP/+4Xb//uF2//7hdv//4Hn/dIzD//v8///7/P//dIzD//7hdv//3Xf//913//7hdv9UTjj/
-////AP///wBUTjj//uF2///fd//+4Xb//uF2/6ajif90jMP/dIzD/46Zpv/+4Xb//+F1///feP/+
-4Xb/VE44/////wD///8AVE44//7hdv/z1XT////////////Is3L/HyAj/x8gI//Is3L/////////
-///z1XT//uF2/1ROOP////8A19nd/1ROOP/+4Xb/5+HS//v+//8RExf/Liwn//7hdv/+4Xb/5+HS
-//v8//8RExf/Liwn//7hdv9UTjj/19nd/1ROOP94aDT/yKdO/+fh0v//////ERMX/y4sJ//+4Xb/
-/uF2/+fh0v//////ERMX/y4sJ//Ip07/dWU3/1ROOP9UTjj/yKdO/6qSSP/Is3L/9fb7//f6///I
-s3L//uF2//7hdv/Is3L////////////Is3L/qpJI/8inTv9UTjj/19nd/1ROOP97c07/qpJI/8in
-Tv/Ip07//uF2//7hdv/+4Xb//uF2/8zBlv/Kv4//pZJU/3tzTv9UTjj/19nd/////wD///8A4eLl
-/6CcjP97c07/e3NO/1dOMf9BOiX/TkUn/2VXLf97c07/e3NO/6CcjP/h4uX/////AP///wD///8A
-////AP///wD///8A////AP///wDq6/H/3N/j/9fZ3f/q6/H/////AP///wD///8A////AP///wD/
-//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAA==`),
+		strings.NewReader(`data:image/vnd.microsoft.icon;name=golang%20favicon;base64,`+golangFavicon),
 	)
 	if err != nil {
 		fmt.Println(err)

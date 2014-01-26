@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -242,4 +243,16 @@ func Decode(r io.Reader) (*DataURL, error) {
 		return nil, err
 	}
 	return DecodeString(string(data))
+}
+
+// EncodeBytes encodes the data bytes into a Data URL string, using base 64 encoding.
+//
+// The media type of data is detected using http.DetectContentType.
+func EncodeBytes(data []byte) string {
+	mt := http.DetectContentType(data)
+	// http.DetectContentType may add spurious spaces between ; and a parameter.
+	// The canonical way is to not have them.
+	cleanedMt := strings.Replace(mt, "; ", ";", -1)
+
+	return New(data, cleanedMt).String()
 }
