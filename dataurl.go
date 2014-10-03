@@ -13,8 +13,10 @@ import (
 )
 
 const (
+	// EncodingBase64 is base64 encoding for the data url
 	EncodingBase64 = "base64"
-	EncodingASCII  = "ascii"
+	// EncodingASCII is ascii encoding for the data url
+	EncodingASCII = "ascii"
 )
 
 func defaultMediaType() MediaType {
@@ -33,6 +35,7 @@ type MediaType struct {
 	Params  map[string]string
 }
 
+// ContentType returns the content type of the dataurl's data, in the form type/subtype.
 func (mt *MediaType) ContentType() string {
 	return fmt.Sprintf("%s/%s", mt.Type, mt.Subtype)
 }
@@ -180,7 +183,7 @@ func (p *parser) parse() error {
 		case itemLeftStringQuote:
 			p.unquoteParamVal = true
 		case itemParamVal:
-			var val string = item.val
+			val := item.val
 			if p.unquoteParamVal {
 				p.unquoteParamVal = false
 				us, err := strconv.Unquote("\"" + val + "\"")

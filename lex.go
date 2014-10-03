@@ -480,9 +480,8 @@ func lexDataComma(l *lexer) stateFn {
 	l.emit(itemDataComma)
 	if l.seenBase64Item {
 		return lexBase64Data
-	} else {
-		return lexData
 	}
+	return lexData
 }
 
 func lexData(l *lexer) stateFn {

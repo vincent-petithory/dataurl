@@ -228,7 +228,7 @@ func expectItems(expected, actual []item) bool {
 	if len(expected) != len(actual) {
 		return false
 	}
-	for i, _ := range expected {
+	for i := range expected {
 		if expected[i].t != actual[i].t {
 			return false
 		}
@@ -260,7 +260,7 @@ func equal(du1, du2 *DataURL) (bool, error) {
 func TestLexDataURLs(t *testing.T) {
 	for _, test := range genTestTable() {
 		l := lex(test.InputRawDataURL)
-		items := make([]item, 0)
+		var items []item
 		for item := range l.items {
 			items = append(items, item)
 		}
