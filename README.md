@@ -55,6 +55,27 @@ func handleDataURLUpload(w http.ResponseWriter, r *http.Request) {
 }
 ~~~
 
+## Command
+
+For convenience, a `dataurl` command is provided to encode/decode dataurl streams.
+
+~~~
+dataurl - Encode or decode dataurl data and print to standard output
+
+Usage: dataurl [OPTION]... [FILE]
+
+  dataurl encodes or decodes FILE or standard input if FILE is - or omitted, and prints to standard output.
+  Unless -mimetype is used, when FILE is specified, dataurl will attempt to detect its mimetype using Go's mime.TypeByExtension (http://golang.org/pkg/mime/#TypeByExtension). If this fails or data is read from STDIN, the mimetype will default to application/octet-stream.
+
+Options:
+  -a=false: encode data using ascii instead of base64
+  -ascii=false: encode data using ascii instead of base64
+  -d=false: decode data instead of encoding
+  -decode=false: decode data instead of encoding
+  -m="": force the mimetype of the data to encode to this value
+  -mimetype="": force the mimetype of the data to encode to this value
+~~~
+
 ## Contributing
 
-Feel to file an issue/make a pull request if you find any bug, or want to suggest enhancements.
+Feel free to file an issue/make a pull request if you find any bug, or want to suggest enhancements.
