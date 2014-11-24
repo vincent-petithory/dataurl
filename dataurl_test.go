@@ -313,6 +313,14 @@ func TestDataURLsWithDecodeString(t *testing.T) {
 	})
 }
 
+func TestDataURLsWithUnmarshalText(t *testing.T) {
+	testDataURLs(t, func(s string) (*DataURL, error) {
+		d := &DataURL{}
+		err := d.UnmarshalText([]byte(s))
+		return d, err
+	})
+}
+
 func TestRoundTrip(t *testing.T) {
 	tests := []struct {
 		s           string
@@ -335,6 +343,17 @@ func TestRoundTrip(t *testing.T) {
 			t.Errorf("Expected %s, got %s", test.s, dus)
 		} else if !test.roundTripOk && dus == test.s {
 			t.Errorf("Found %s, expected something else", test.s)
+		}
+
+		txt, err := dataURL.MarshalText()
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+		if test.roundTripOk && string(txt) != test.s {
+			t.Errorf("MarshalText roundtrip: got '%s', want '%s'", txt, test.s)
+		} else if !test.roundTripOk && string(txt) == test.s {
+			t.Errorf("MarshalText roundtrip: got '%s', want something else", txt)
 		}
 	}
 }

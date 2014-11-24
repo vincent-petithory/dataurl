@@ -140,6 +140,25 @@ func (du *DataURL) WriteTo(w io.Writer) (n int64, err error) {
 	return
 }
 
+// UnmarshalText decodes a Data URL string and sets it to *du
+func (du *DataURL) UnmarshalText(text []byte) error {
+	decoded, err := DecodeString(string(text))
+	if err != nil {
+		return err
+	}
+	*du = *decoded
+	return nil
+}
+
+// MarshalText writes du as a Data URL
+func (du *DataURL) MarshalText() ([]byte, error) {
+	buf := bytes.NewBuffer(nil)
+	if _, err := du.WriteTo(buf); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
 type encodedDataReader func(string) ([]byte, error)
 
 var asciiDataReader encodedDataReader = func(s string) ([]byte, error) {
