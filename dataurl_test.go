@@ -494,7 +494,7 @@ func TestEncodeBytes(t *testing.T) {
 		},
 		{
 			mustDecode(golangFavicon),
-			`data:image/vnd.microsoft.icon;base64,` + golangFavicon,
+			`data:image/x-icon;base64,` + golangFavicon,
 		},
 	}
 	for _, test := range tests {
