@@ -11,7 +11,7 @@ var tests = []struct {
 	unescaped []byte
 }{
 	{"A%20brief%20note%0A", []byte("A brief note\n")},
-	{"%7B%5B%5Dbyte(%22A%2520brief%2520note%22)%2C%20%5B%5Dbyte(%22A%20brief%20note%22)%7D", []byte(`{[]byte("A%20brief%20note"), []byte("A brief note")}`)},
+	{"%7B%5B%5Dbyte%28%22A%2520brief%2520note%22%29%2C%20%5B%5Dbyte%28%22A%20brief%20note%22%29%7D", []byte(`{[]byte("A%20brief%20note"), []byte("A brief note")}`)},
 }
 
 func TestEscape(t *testing.T) {
