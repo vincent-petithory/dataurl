@@ -80,11 +80,8 @@ func isTSpecialRune(r rune) bool {
 // This doesn't include extension-token case
 // as it's handled separatly
 func isDiscreteType(s string) bool {
-	if strings.HasPrefix(s, "text") ||
-		strings.HasPrefix(s, "image") ||
-		strings.HasPrefix(s, "audio") ||
-		strings.HasPrefix(s, "video") ||
-		strings.HasPrefix(s, "application") {
+	switch s {
+	case "text", "image", "audio", "video", "application":
 		return true
 	}
 	return false
@@ -94,8 +91,8 @@ func isDiscreteType(s string) bool {
 // This doesn't include extension-token case
 // as it's handled separatly
 func isCompositeType(s string) bool {
-	if strings.HasPrefix(s, "message") ||
-		strings.HasPrefix(s, "multipart") {
+	switch s {
+	case "message", "multipart":
 		return true
 	}
 	return false

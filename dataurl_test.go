@@ -551,6 +551,33 @@ func BenchmarkRegexp(b *testing.B) {
 	}
 }
 
+func TestMediaTypeIsAnExactToken(t *testing.T) {
+	for _, s := range []string{
+		"data:textEXTRA/plain,hi",
+		"data:imageX/png,hi",
+		"data:applicationFOO/octet-stream,hi",
+		"data:messageEXTRA/rfc822,hi",
+	} {
+		if _, err := DecodeString(s); err == nil {
+			t.Fatalf("%s: expected error", s)
+		}
+	}
+	du, err := DecodeString("data:text/plain,hi")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if du.ContentType() != "text/plain" || string(du.Data) != "hi" {
+		t.Fatalf("%s %q", du.ContentType(), du.Data)
+	}
+	du, err = DecodeString("data:x-foo/bar,hi")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if du.ContentType() != "x-foo/bar" || string(du.Data) != "hi" {
+		t.Fatalf("%s %q", du.ContentType(), du.Data)
+	}
+}
+
 func ExampleDecodeString() {
 	dataURL, err := DecodeString(`data:text/plain;charset=utf-8;base64,aGV5YQ==`)
 	if err != nil {
